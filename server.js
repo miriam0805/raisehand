@@ -22,11 +22,26 @@ app.use('/socket.io', express.static(__dirname + '/node_modules/socket.io/client
 // userpass.json 파일에 대한 라우트 추가
 app.get('/userpass.json', (req, res) => {
     console.log('userpass.json 요청 받음');
-    // 인증된 사용자의 이니셜 데이터
-    const userData = {
-        initials: ["토킹-", "울림-", "명성-", "지변-", "어울림-", "더성장-", "희망-", "괴물-"]
-    };
-    res.json(userData);
+    try {
+        const fs = require('fs');
+        const path = require('path');
+        const userpassPath = path.join(__dirname, 'userpass.json');
+        console.log('userpass.json 파일 경로:', userpassPath);
+        
+        if (!fs.existsSync(userpassPath)) {
+            console.error('userpass.json 파일이 존재하지 않습니다.');
+            return res.status(404).json({ error: '사용자 데이터 파일을 찾을 수 없습니다.' });
+        }
+        
+        const userpassData = fs.readFileSync(userpassPath, 'utf8');
+        const userData = JSON.parse(userpassData);
+        console.log('userpass.json 데이터 로드 성공:', userData.users.length, '명의 사용자');
+        console.log('사용자 목록:', userData.users.map(u => ({ username: u.username, initials: u.initials })));
+        res.json(userData);
+    } catch (error) {
+        console.error('userpass.json 로드 오류:', error);
+        res.status(500).json({ error: '사용자 데이터를 불러올 수 없습니다.' });
+    }
 });
 
 let queue = []; // 대기자 명단
@@ -103,9 +118,23 @@ app.get('/student', (req, res) => {
     res.sendFile(__dirname + '/student.html');
 });
 
+app.get('/battle', (req, res) => {
+    res.sendFile(__dirname + '/battle.html');
+});
+
+app.get('/hakwonbattle', (req, res) => {
+    res.sendFile(__dirname + '/hakwonbattle.html');
+});
+
+app.get('/teacherbattle', (req, res) => {
+    res.sendFile(__dirname + '/teacherbattle.html');
+});
+
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0';
+
+server.listen(PORT, HOST, () => {
+    console.log(`Server is running on ${HOST}:${PORT}`);
 });
 
 

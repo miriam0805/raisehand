@@ -9,7 +9,7 @@
     <style>
         body {
             background-color: #f0f8ff; /* 배경색 설정 (연한 파랑색) */
-            background-image: url('http://raisehand.cloudtype.com/images/jgs.jpg'); /* 여기에 원하는 이미지 URL을 넣으세요 */
+            background-image: url('http://raisehand.cloudtype.com/images/jgs.jpg'); /* cloudtype 서버 이미지 사용 */
             background-size: cover; /* 전체 화면을 덮도록 설정 */
             background-position: center; /* 배경 이미지 중앙 정렬 */
             font-family: Arial, sans-serif; /* 폰트 설정 */
@@ -127,7 +127,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
-            const socket = io('http://raisehand.cloudtype.com:3000', {
+            const socket = io('https://port-0-raisehand-mdkcxhui65fbefde.sel5.cloudtype.app', {
                 transports: ['websocket'],
                 upgrade: false
             });
