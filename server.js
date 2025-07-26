@@ -130,6 +130,23 @@ app.get('/teacherbattle', (req, res) => {
     res.sendFile(__dirname + '/teacherbattle.html');
 });
 
+// .html 확장자로 직접 접근하는 경우도 처리
+app.get('/student.html', (req, res) => {
+    res.sendFile(__dirname + '/student.html');
+});
+
+app.get('/battle.html', (req, res) => {
+    res.sendFile(__dirname + '/battle.html');
+});
+
+app.get('/hakwonbattle.html', (req, res) => {
+    res.sendFile(__dirname + '/hakwonbattle.html');
+});
+
+app.get('/teacherbattle.html', (req, res) => {
+    res.sendFile(__dirname + '/teacherbattle.html');
+});
+
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 
