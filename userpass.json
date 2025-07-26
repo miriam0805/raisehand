@@ -1,0 +1,102 @@
+{
+    "users": [
+        {
+            "id": "001",
+            "username": "fire",
+            "password": "5279",
+            "initials": "001-파머스영어**",
+            "name" : "파머스영어**"
+        },
+        {
+            "id": "002",
+            "username": "lin",
+            "password": "1119",
+            "initials": "002-Lin_",
+            "name" : "Lin_"
+        },
+        {
+            "id": "003",
+            "username": "user3",
+            "password": "113",
+            "initials": "003-어울림_",
+            "name" : "어울림"
+        },
+        {
+            "id": "004",
+            "username": "토킹",
+            "password": "321",
+            "initials": "**토킹스타**",
+            "name" : "토킹스타"
+        },
+        {
+            "id": "005",
+            "username": "user5",
+            "password": "115",
+            "initials": "005-수산나_",
+            "name" : "수산나"
+        },
+        {
+            "id": "006",
+            "username": "user6",
+            "password": "116",
+            "initials": "006-더상승_",
+            "name" : "더상승"
+        },
+        {
+            "id": "007",
+            "username": "user7",
+            "password": "117",
+            "initials": "007-명성_",
+            "name" : "명성"
+        },
+        {
+            "id": "008",
+            "username": "user8",
+            "password": "118",
+            "initials": "008-지변_",
+            "name" : "지변"
+        },
+        {
+            "id": "009",
+            "username": "user9",
+            "password": "119",
+            "initials": "009-어울림_",
+            "name" : "어울림"
+        },
+        {
+            "id": "010",
+            "username": "user10",
+            "password": "110",
+            "initials": "010-사론_",
+            "name" : "사론"
+        },
+        {
+            "id": "011",
+            "username": "user11",
+            "password": "111",
+            "initials": "011-피터_",
+            "name" : "피터"
+        },
+        {
+            "id": "012",
+            "username": "user12",
+            "password": "112",
+            "initials": "012-장군_",
+            "name" : "장군"
+        },
+        {
+            "id": "013",
+            "username": "user13",
+            "password": "113",
+            "initials": "013-대령_",
+            "name" : "대령"
+        },
+        {
+            "id": "014",
+            "username": "user14",
+            "password": "114",
+            "initials": "014-몬스터_",
+            "name" : "몬스터"
+        }   
+      ]
+}

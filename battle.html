@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeyo</title>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <style>
+        body {
+            background-color: #f0f8ff;
+            background-image: url('https://img.freepik.com/free-photo/pink-sky-background-with-crescent-moon_53876-129048.jpg?t=st=1742335404~exp=1742339004~hmac=e12c916e1351ff97750d88fee5cdf43cbfba421655c81abccf1e8a5629aa5cca&w=1380');
+            background-size: cover;
+            background-position: center;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        /* 입력 창 스타일 추가 */
+        input[type="text"], 
+        input[type="password"],
+        select {
+            background-color: #cce6ff;  /* 더 선명한 연한 하늘색 */
+            border: 1px solid #99ccff;  /* 테두리 색상 진하게 */
+            padding: 5px;
+            border-radius: 4px;
+            margin: 5px;  /* 요소 주변 여백 추가 */
+        }
+
+        /* div 컨테이너 간격 조정 */
+        div {
+            margin: 20px 0;  /* 상하 여백 20px 추가 */
+            padding: 10px;   /* 내부 여백 추가 */
+        }
+
+        /* 버튼 스타일 수정 */
+        button {
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: #cce6ff;  /* 더 선명한 연한 하늘색 */
+            border: 1px solid #99ccff;  /* 테두리 색상 진하게 */
+            border-radius: 4px;         /* 모서리 둥글게 */
+            color: #2c5282;            /* 글자 색상 */
+            cursor: pointer;           /* 마우스 오버시 포인터 표시 */
+        }
+
+        /* 버튼 호버 효과 */
+        button:hover {
+            background-color: #b3d9ff;  /* 호버시 더 진한 하늘색 */
+            transition: background-color 0.2s;  /* 부드러운 색상 전환 효과 */
+        }
+
+        /* disabled 상태의 select 박스도 색상 유지 */
+        select:disabled {
+            background-color: #cce6ff;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Battle</h1>
+    <div id="loggedInUserInitial"></div>
+    
+    <div>
+        <select id="initial" disabled>
+            <option value="">학원명</option>  <!-- 학원명은 입력받지 않도록 비활성화 -->
+        </select>
+    </div>
+
+    <div>
+        <select id="initialSelect" disabled>
+            <option value="">이니셜 선택</option>
+        </select>
+        <input type="text" id="studentName" placeholder="이름 입력">
+        <input type="text" id="newInput" placeholder="Challenge 입력">
+        <button id="raiseHandBtn">battle 신청</button>
+    </div>
+    
+    <div>
+        <select id="filterInitial">
+            <option value="">로그인한 이니셜 보기</option>
+        </select>
+    </div>
+
+    <div>
+        <form id="teacherForm">
+            <input type="text" id="hiddenUsername" name="username" style="display:none;" autocomplete="username">
+            <input type="password" id="teacherPassword" placeholder="비밀번호 입력" autocomplete="new-password">
+            <button id="confirmBtn" type="button">선생님 확인</button>
+            <button id="deleteAllBtn" type="button" style="display: none;">전체 삭제</button>
+        </form>
+    </div>
+    
+    <h2>대기자 명단</h2>
+    <ul id="queue" style="cursor: pointer;"></ul>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const socket = io('http://localhost:3000', {
+                transports: ['websocket'],
+                upgrade: false
+            });
+            let currentQueue = []; // 현재 대기열 저장
+            let isTeacherMode = false; // 선생님 모드 상태 변수 추가
+
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            if (loggedInUser) {
+                document.getElementById('loggedInUserInitial').textContent = `로그인한 사용자: ${loggedInUser.username}`;
+
+                const initialSelect = document.getElementById('initialSelect');
+                initialSelect.innerHTML = `<option value="${loggedInUser.initials}">${loggedInUser.initials}</option>`;
+                initialSelect.disabled = true; // 이니셜 선택 비활성화
+
+                // 로그인한 사용자의 이니셜을 필터 드롭다운에 추가
+                const filterInitial = document.getElementById('filterInitial');
+                filterInitial.innerHTML = `<option value="${loggedInUser.initials}">${loggedInUser.initials}</option>`;
+                filterInitial.disabled = true; // 필터링 드롭다운 비활성화
+            } else {
+                alert('로그인 정보가 없습니다. 로그인 페이지로 이동합니다.');
+                window.location.href = 'index.html'; // 로그인 페이지로 리다이렉트
+            }
+
+            async function raiseHand() {
+                const studentName = document.getElementById('studentName').value;
+                const newInput = document.getElementById('newInput').value;
+
+                if (!studentName || !newInput) {
+                    alert('이름과 새 입력값을 모두 입력해주세요.');
+                    return;
+                }
+
+                try {
+                    const handRaiseData = {
+                        initial: loggedInUser.initials,
+                        name: `${loggedInUser.initials}-battle-${studentName}`,
+                        newInput: newInput,
+                        addedBy: loggedInUser.username
+                    };
+                    socket.emit('raise_hand', handRaiseData);
+                    
+                    // 입력 필드 초기화
+                    document.getElementById('studentName').value = '';
+                    document.getElementById('newInput').value = '';
+                } catch (error) {
+                    console.error('Error in raiseHand:', error);
+                    alert('오류가 발생했습니다. 다시 시도해주세요.');
+                }
+            }
+
+            function updateQueueDisplay(queue) {
+                const queueList = document.getElementById('queue');
+                // 배틀 항목 필터링
+                const filteredQueue = queue.filter(user => user.name.includes('battle'));
+                
+                if (filteredQueue.length > 0) {
+                    queueList.innerHTML = filteredQueue.map((user, index) => {
+                        // 이름과 newInput 값을 분리하여 표시
+                        const nameParts = user.name.split('-');
+                        const studentName = nameParts[nameParts.length - 1]; // 마지막 부분이 학생 이름
+                        
+                        return `<li class="${isTeacherMode ? 'teacher-mode' : ''}" data-name="${user.name}">
+                            ${index + 1}. ${studentName} | Challenge: ${user.newInput || '없음'}
+                            ${isTeacherMode ? ' (클릭하여 제거)' : ''}
+                        </li>`;
+                    }).join('');
+
+                    if (isTeacherMode) {
+                        const items = queueList.getElementsByTagName('li');
+                        Array.from(items).forEach(item => {
+                            item.addEventListener('click', function() {
+                                const studentName = this.getAttribute('data-name');
+                                if (confirm(`${studentName} 학생을 명단에서 제거하시겠습니까?`)) {
+                                    socket.emit('teacher_confirm', studentName);
+                                }
+                            });
+                        });
+                    }
+                } else {
+                    queueList.innerHTML = '<li>대기자 없음</li>';
+                }
+            }
+
+            // 전체 삭제 함수 수정
+            function deleteAllStudents() {
+                if (isTeacherMode && confirm('모든 배틀 대기자를 삭제하시겠습니까?')) {
+                    const deleteData = {
+                        initial: loggedInUser.initials,  // 현재 로그인한 학원의 이니셜
+                        type: 'battle'
+                    };
+                    socket.emit('delete_all_battle_students', deleteData);
+                }
+            }
+
+            // confirmStudent 함수는 그대로 유지
+            function confirmStudent() {
+                const password = document.getElementById('teacherPassword').value;
+                if (password === '1230') {
+                    isTeacherMode = !isTeacherMode;
+                    document.getElementById('teacherPassword').value = '';
+                    document.getElementById('deleteAllBtn').style.display = isTeacherMode ? 'inline-block' : 'none';
+                    updateQueueDisplay(currentQueue);
+                    alert(isTeacherMode ? '선생님 모드가 활성화되었습니다.' : '선생님 모드가 비활성화되었습니다.');
+                } else {
+                    alert('비밀번호가 틀렸습니다.');
+                }
+            }
+
+            // 이벤트 리스너 등록
+            document.getElementById('raiseHandBtn').addEventListener('click', raiseHand);
+            document.getElementById('confirmBtn').addEventListener('click', confirmStudent);
+            document.getElementById('deleteAllBtn').addEventListener('click', deleteAllStudents);
+
+            socket.on('update_queue', (queue) => {
+                console.log('서버로부터 대기열 업데이트 받음:', queue);
+                currentQueue = queue; 
+                updateQueueDisplay(queue);
+            });
+
+            // 새로운 배틀 정보를 받는 이벤트 리스너 추가
+            socket.on('new_battle_info', (data) => {
+                console.log('서버로부터 새로운 배틀 정보 받음:', data);
+                // 새로운 배틀 정보가 포함된 대기열 업데이트
+                if (data && Array.isArray(data.queue)) {
+                    currentQueue = data.queue;
+                    updateQueueDisplay(data.queue);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
